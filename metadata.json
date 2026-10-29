@@ -1,0 +1,6 @@
+{
+  "name": "Chintan Sarani",
+  "description": "Daily spiritual routine checkup and habit tracker with 3-step guided wizard, weekly and monthly analytics, customizable goals, and Marathi-English bilingual support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
