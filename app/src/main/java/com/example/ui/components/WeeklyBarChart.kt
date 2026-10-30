@@ -55,6 +55,8 @@ data class DayChartData(
     val dayLabel: String,
     val naamjapTotal: Int,
     val habitsCompleted: Int,
+    val totalHabits: Int = 17,
+    val completionPercentage: Float = if (totalHabits > 0) (habitsCompleted.toFloat() / totalHabits * 100f) else 0f,
     val isSelected: Boolean
 )
 

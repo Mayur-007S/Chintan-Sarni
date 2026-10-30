@@ -84,9 +84,9 @@ import com.example.ui.viewmodel.WeeklyProgressDay
 
 // Enum for Integer-based spiritual practices (Line Graph)
 enum class IntegerPractice(val marathiLabel: String, val englishLabel: String) {
-    TOTAL_NAAMJAP("एकूण नामजप", "Total Naamjap"),
-    KULDEVI("कुलदेवी नामजप", "Kuldevi Naamjap"),
-    GURUDEV_DATTA("दत्त नामजप", "Gurudev Datta"),
+    TOTAL_NAAMJAP("एकूण नामजप (वेळ)", "Total Naamjap (mins)"),
+    KULDEVI("कुलदेवी नामजप (वेळ)", "Kuldevi Naamjap (mins)"),
+    GURUDEV_DATTA("दत्त नामजप (वेळ)", "Gurudev Datta (mins)"),
     KAPUR_ITR("कापूर इत्र उपाय", "Camphor & Attar"),
     PRARTHANA("प्रार्थना", "Prayers"),
     KRUTAJNATA("कृतज्ञता", "Gratitude"),
@@ -552,8 +552,13 @@ private fun WeekNavigatorCard(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 val startLabel = weeklyDays.firstOrNull()?.fullDateLabel ?: ""
                 val endLabel = weeklyDays.lastOrNull()?.fullDateLabel ?: ""
+                val dateRangeText = if (startLabel.isNotEmpty() && endLabel.isNotEmpty()) {
+                    "$startLabel - $endLabel"
+                } else {
+                    AppStrings.weeklyChartsTitle(language)
+                }
                 Text(
-                    text = "$startLabel - $endLabel",
+                    text = dateRangeText,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = ChaitanyaBluePrimary
                 )
@@ -647,6 +652,20 @@ private fun RechartsLineChart(
     onInspectIndex: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (weeklyDays.isEmpty()) {
+        Box(
+            modifier = modifier,
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (language == AppLanguage.MARATHI) "डेटा उपलब्ध नाही" else "No data available",
+                style = MaterialTheme.typography.bodySmall,
+                color = ChaitanyaTextSecondary
+            )
+        }
+        return
+    }
+
     val values = remember(weeklyDays, practice) {
         weeklyDays.map { practice.extractValue(it.entry) }
     }
@@ -660,8 +679,9 @@ private fun RechartsLineChart(
             .pointerInput(weeklyDays) {
                 detectTapGestures(
                     onTap = { offset ->
-                        val slotWidth = size.width / 7f
-                        val index = (offset.x / slotWidth).toInt().coerceIn(0, 6)
+                        if (weeklyDays.isEmpty()) return@detectTapGestures
+                        val slotWidth = size.width / weeklyDays.size.toFloat()
+                        val index = (offset.x / slotWidth).toInt().coerceIn(0, weeklyDays.lastIndex)
                         onInspectIndex(if (index == inspectedIndex) -1 else index)
                     }
                 )
@@ -678,7 +698,9 @@ private fun RechartsLineChart(
 
             val chartWidth = width - leftPadding - rightPadding
             val chartHeight = height - topPadding - bottomPadding
-            val slotWidth = chartWidth / 6f
+            val count = values.size
+            if (count == 0) return@Canvas
+            val slotWidth = if (count > 1) chartWidth / (count - 1).toFloat() else chartWidth
 
             // 1. Cartesian Grid Lines (Recharts CartesianGrid strokeDasharray="3 3")
             val gridSteps = 4
@@ -698,7 +720,7 @@ private fun RechartsLineChart(
 
             // Points calculation
             val points = mutableListOf<Offset>()
-            for (i in 0 until 7) {
+            for (i in 0 until count) {
                 val x = leftPadding + i * slotWidth
                 val norm = if (maxVal > 0) (values[i].toFloat() / maxVal).coerceIn(0f, 1f) else 0f
                 val y = topPadding + chartHeight * (1f - norm)
@@ -706,7 +728,7 @@ private fun RechartsLineChart(
             }
 
             // 2. Recharts Area Gradient Fill (smooth curve down to baseline)
-            if (points.isNotEmpty()) {
+            if (points.size >= 2) {
                 val areaPath = Path().apply {
                     moveTo(points[0].x, points[0].y)
                     for (i in 0 until points.size - 1) {
@@ -748,6 +770,12 @@ private fun RechartsLineChart(
                     path = linePath,
                     color = ColorActiveStatus, // #FD0031
                     style = Stroke(width = 3.5.dp.toPx(), cap = StrokeCap.Round)
+                )
+            } else if (points.size == 1) {
+                drawCircle(
+                    color = ColorActiveStatus,
+                    radius = 4.dp.toPx(),
+                    center = points[0]
                 )
             }
 
@@ -902,6 +930,20 @@ private fun RechartsBarChart(
     onInspectIndex: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (weeklyDays.isEmpty()) {
+        Box(
+            modifier = modifier,
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (language == AppLanguage.MARATHI) "डेटा उपलब्ध नाही" else "No data available",
+                style = MaterialTheme.typography.bodySmall,
+                color = ChaitanyaTextSecondary
+            )
+        }
+        return
+    }
+
     val barValues = remember(weeklyDays, practice) {
         weeklyDays.map { day ->
             if (practice == BooleanPractice.ALL_HABITS) {
@@ -922,8 +964,9 @@ private fun RechartsBarChart(
             .pointerInput(weeklyDays) {
                 detectTapGestures(
                     onTap = { offset ->
-                        val slotWidth = size.width / 7f
-                        val index = (offset.x / slotWidth).toInt().coerceIn(0, 6)
+                        if (weeklyDays.isEmpty()) return@detectTapGestures
+                        val slotWidth = size.width / weeklyDays.size.toFloat()
+                        val index = (offset.x / slotWidth).toInt().coerceIn(0, weeklyDays.lastIndex)
                         onInspectIndex(if (index == inspectedIndex) -1 else index)
                     }
                 )
@@ -940,8 +983,10 @@ private fun RechartsBarChart(
 
             val chartWidth = width - leftPadding - rightPadding
             val chartHeight = height - topPadding - bottomPadding
-            val slotWidth = chartWidth / 7f
-            val barWidth = (slotWidth * 0.52f).coerceIn(16f, 36f)
+            val count = barValues.size
+            if (count == 0) return@Canvas
+            val slotWidth = chartWidth / count.toFloat()
+            val barWidth = (slotWidth * 0.52f).coerceIn(14.dp.toPx(), 36.dp.toPx())
 
             // 1. Cartesian Grid Lines
             val gridSteps = 3
@@ -960,7 +1005,7 @@ private fun RechartsBarChart(
             }
 
             // 2. Draw Bars with rounded top corners
-            for (i in 0 until 7) {
+            for (i in 0 until count) {
                 val cx = leftPadding + (i + 0.5f) * slotWidth
                 val valRatio = (barValues[i].toFloat() / maxBarScale).coerceIn(0f, 1f)
                 val barHeight = (chartHeight * valRatio).coerceAtLeast(6f)

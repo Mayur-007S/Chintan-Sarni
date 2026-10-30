@@ -45,6 +45,7 @@ import com.example.data.model.DailyRoutineEntity
 import com.example.localization.AppLanguage
 import com.example.ui.components.MonthlyAveragesCard
 import com.example.ui.components.WeeklyBarChart
+import com.example.ui.components.WeeklyCompletionDashboard
 import com.example.ui.theme.ChaitanyaBlueDark
 import com.example.ui.theme.ChaitanyaBluePrimary
 import com.example.ui.theme.ChaitanyaCardBorder
@@ -89,7 +90,20 @@ fun AnalyticsScreen(
             )
         }
 
-        // --- 1. TODAY'S SUMMARY SCORECARD ---
+        // --- 1. 7-DAY VISUAL ROUTINE COMPLETION RATE DASHBOARD (BAR CHART) ---
+        item {
+            WeeklyCompletionDashboard(
+                weeklyData = weeklyChartData,
+                allEntries = allEntries,
+                language = activeLang,
+                onDayClick = { dateStr ->
+                    viewModel.selectDate(dateStr)
+                    onNavigateToDaily(dateStr)
+                }
+            )
+        }
+
+        // --- 2. TODAY'S SUMMARY SCORECARD ---
         item {
             TodayScorecard(
                 entry = currentDraft,
@@ -99,7 +113,7 @@ fun AnalyticsScreen(
             )
         }
 
-        // --- 2. THIS WEEK'S INTUITIVE CHART ---
+        // --- 3. THIS WEEK'S NAAMJAP CHART ---
         item {
             WeeklyBarChart(
                 weeklyData = weeklyChartData,
@@ -207,7 +221,11 @@ private fun TodayScorecard(
                 MetricPill(
                     icon = Icons.Default.SelfImprovement,
                     label = if (language == AppLanguage.MARATHI) "नामजप" else "Naamjap",
-                    value = "${entry.totalNaamjap}",
+                    value = if (entry.totalNaamjap > 0) {
+                        if (language == AppLanguage.MARATHI) "${entry.totalNaamjap} मि." else "${entry.totalNaamjap} min"
+                    } else {
+                        if (language == AppLanguage.MARATHI) "० मि." else "0 min"
+                    },
                     modifier = Modifier.weight(1f)
                 )
                 MetricPill(

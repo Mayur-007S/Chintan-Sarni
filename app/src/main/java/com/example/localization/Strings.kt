@@ -78,9 +78,35 @@ object AppStrings {
         AppLanguage.MARATHI -> "कुलदेवी नामजप"
         AppLanguage.ENGLISH -> "Kuldevi Naamjap"
     }
+    fun kuldeviDesc(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "नामजप वेळ मिनिटांत (उदा. ३० मिनिटे)"
+        AppLanguage.ENGLISH -> "Chanting duration in minutes (e.g. 30 mins)"
+    }
     fun gurudevDattaName(lang: AppLanguage) = when (lang) {
         AppLanguage.MARATHI -> "श्री गुरुदेव दत्त नामजप"
         AppLanguage.ENGLISH -> "Shri Gurudev Datta Naamjap"
+    }
+    fun gurudevDattaDesc(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "नामजप वेळ मिनिटांत (उदा. १० मिनिटे)"
+        AppLanguage.ENGLISH -> "Chanting duration in minutes (e.g. 10 mins)"
+    }
+    fun minutesUnit(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "मिनिटे"
+        AppLanguage.ENGLISH -> "mins"
+    }
+    fun newEntryButton(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "नवीन नोंद"
+        AppLanguage.ENGLISH -> "New Entry"
+    }
+
+    fun fillSampleValuesButton(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "नमुना भरा (५-१०)"
+        AppLanguage.ENGLISH -> "Fill Sample (5-10)"
+    }
+
+    fun fillSampleSuccessSnackbar(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "✓ ५ ते १० मूल्यांची नमुना माहिती फॉर्ममध्ये भरली गेली आहे!"
+        AppLanguage.ENGLISH -> "✓ Sample values (5 to 10) filled in the form!"
     }
 
     fun item2Title(lang: AppLanguage) = when (lang) {
@@ -338,5 +364,157 @@ object AppStrings {
     fun currentWeek(lang: AppLanguage) = when (lang) {
         AppLanguage.MARATHI -> "चालू आठवडा"
         AppLanguage.ENGLISH -> "Current Week"
+    }
+
+    // 7-Day Completion Rate Dashboard Strings
+    fun completionDashboardTitle(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "७ दिवसांचा साधना पूर्णता दर डॅशबोर्ड"
+        AppLanguage.ENGLISH -> "7-Day Routine Completion Dashboard"
+    }
+
+    fun completionDashboardSubtitle(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "गेल्या ७ दिवसांतील चिंतन सारणी पूर्णतेचा स्तंभ आलेख (०-१००%)"
+        AppLanguage.ENGLISH -> "Bar chart of daily spiritual routine completion rates (0-100%)"
+    }
+
+    fun avgCompletionRateLabel(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "सरासरी पूर्णता दर"
+        AppLanguage.ENGLISH -> "Avg Completion"
+    }
+
+    fun highConsistencyDays(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "उत्तम पूर्णता दिवस"
+        AppLanguage.ENGLISH -> "Consistent Days"
+    }
+
+    fun inspectDayRoutine(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "या दिवसाची सारणी उघडा"
+        AppLanguage.ENGLISH -> "Open Daily Routine"
+    }
+
+    fun phaseBreakdownTitle(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "टप्प्यानुसार ७ दिवसांची सरासरी पूर्णता"
+        AppLanguage.ENGLISH -> "7-Day Phase Completion Breakdown"
+    }
+
+    // History Search and Filter Strings
+    fun searchHistoryPlaceholder(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "तारीख किंवा साधना शोधा (उदा. 2026-10, नामजप...)"
+        AppLanguage.ENGLISH -> "Search by date or practice (e.g. 2026-10, Naamjap...)"
+    }
+
+    fun searchFilterHeading(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "तारीख किंवा साधनेनुसार शोधा"
+        AppLanguage.ENGLISH -> "Filter by Date or Practice"
+    }
+
+    fun filterResultsCount(lang: AppLanguage, count: Int, total: Int) = when (lang) {
+        AppLanguage.MARATHI -> "$total पैकी $count नोंदी उपलब्ध"
+        AppLanguage.ENGLISH -> "Showing $count of $total entries"
+    }
+
+    fun clearSearch(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "शोध मजकूर पुसा"
+        AppLanguage.ENGLISH -> "Clear search"
+    }
+
+    fun resetFilters(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "फिल्टर पूर्ववत करा"
+        AppLanguage.ENGLISH -> "Reset Filter"
+    }
+
+    fun noMatchingEntriesTitle(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "कोणतीही नोंद सापडली नाही"
+        AppLanguage.ENGLISH -> "No matching entries found"
+    }
+
+    fun noMatchingEntriesSubtitle(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "शोधलेली तारीख किंवा साधनेचे नाव तपासून पुन्हा प्रयत्न करा."
+        AppLanguage.ENGLISH -> "Check your date or practice name and try again."
+    }
+
+    fun filterAll(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "सर्व"
+        AppLanguage.ENGLISH -> "All"
+    }
+
+    fun filterNaamjap(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "नामजप"
+        AppLanguage.ENGLISH -> "Naamjap"
+    }
+
+    fun filterKapurItr(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "कापूर इत्र"
+        AppLanguage.ENGLISH -> "Camphor"
+    }
+
+    fun filterPrarthana(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "प्रार्थना"
+        AppLanguage.ENGLISH -> "Prayers"
+    }
+
+    fun filterKrutajnata(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "कृतज्ञता"
+        AppLanguage.ENGLISH -> "Gratitude"
+    }
+
+    fun filterAavaran(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "आवरण"
+        AppLanguage.ENGLISH -> "Aavaran"
+    }
+
+    fun filterBhavjagruti(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "भावजागृती"
+        AppLanguage.ENGLISH -> "Bhavjagruti"
+    }
+
+    fun filterAatmanivedan(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "आत्मनिवेदन"
+        AppLanguage.ENGLISH -> "Aatmanivedan"
+    }
+
+    fun filterManachaAadhav(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "मनाचा आढावा"
+        AppLanguage.ENGLISH -> "Mind Review"
+    }
+
+    fun filterGranthPathan(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "ग्रंथ पठण"
+        AppLanguage.ENGLISH -> "Holy Text"
+    }
+
+    fun filterDainandinLikhan(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "दैनंदिन लिखाण"
+        AppLanguage.ENGLISH -> "Journaling"
+    }
+
+    fun filterChukaVicharne(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "चुका विचारणे"
+        AppLanguage.ENGLISH -> "Admitting Faults"
+    }
+
+    fun filterPrayashchitta(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "प्रायश्चित"
+        AppLanguage.ENGLISH -> "Penance"
+    }
+
+    fun filterSaraniLikhan(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "सारणी लिखाण"
+        AppLanguage.ENGLISH -> "Sarani"
+    }
+
+    fun filterChukaLihine(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "चुका लिहिणे"
+        AppLanguage.ENGLISH -> "Writing Mistakes"
+    }
+
+    fun filterSwayamsuchana(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "स्वयंसूचना"
+        AppLanguage.ENGLISH -> "Autosuggestion"
+    }
+
+    fun filterKshamayachana(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "क्षमायाचना"
+        AppLanguage.ENGLISH -> "Forgiveness"
     }
 }

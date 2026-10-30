@@ -45,6 +45,8 @@ import com.example.ui.theme.ColorComponentWhite
 import com.example.ui.theme.ColorNavigations
 import com.example.ui.theme.ColorTextWhite
 
+import com.example.localization.AppLanguage
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CounterItemCard(
@@ -53,7 +55,9 @@ fun CounterItemCard(
     value: Int,
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    isTimeInMinutes: Boolean = false,
     isJapaPreset: Boolean = false,
+    language: AppLanguage = AppLanguage.MARATHI,
     testTag: String = ""
 ) {
     val isCompleted = value > 0
@@ -106,13 +110,17 @@ fun CounterItemCard(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // Stepper controls
+                // Stepper controls (increments / decrements directly by 1)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     FilledTonalIconButton(
-                        onClick = { if (value > 0) onValueChange(value - 1) },
+                        onClick = {
+                            if (value > 0) {
+                                onValueChange((value - 1).coerceAtLeast(0))
+                            }
+                        },
                         enabled = value > 0,
                         modifier = Modifier
                             .size(40.dp)
@@ -125,17 +133,35 @@ fun CounterItemCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Remove,
-                            contentDescription = "Decrease count",
+                            contentDescription = if (isTimeInMinutes) "वेळ १ मिनिट कमी करा" else "Decrease count",
                             modifier = Modifier.size(18.dp)
                         )
                     }
 
-                    // Value badge
+                    // Value badge (Formatted for minutes or count)
+                    val displayValue = if (isTimeInMinutes) {
+                        if (value <= 0) {
+                            if (language == AppLanguage.MARATHI) "० मि." else "0 min"
+                        } else if (value < 60) {
+                            if (language == AppLanguage.MARATHI) "$value मि." else "$value min"
+                        } else {
+                            val hrs = value / 60
+                            val mins = value % 60
+                            if (language == AppLanguage.MARATHI) {
+                                if (mins == 0) "$hrs तास" else "$hrs तास $mins मि."
+                            } else {
+                                if (mins == 0) "$hrs hr" else "$hrs hr $mins min"
+                            }
+                        }
+                    } else {
+                        "$value"
+                    }
+
                     Text(
-                        text = "$value",
-                        style = MaterialTheme.typography.titleLarge.copy(
+                        text = displayValue,
+                        style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
+                            fontSize = if (isTimeInMinutes && value >= 60) 15.sp else 18.sp
                         ),
                         color = if (value > 0) ColorActiveStatus // #FD0031
                         else ChaitanyaTextSecondary,
@@ -144,7 +170,7 @@ fun CounterItemCard(
                             .testTag("${testTag}_value")
                     )
 
-                    // Increment button with active status color #FD0031 and text #FFFFFF
+                    // Increment button with active status color #FD0031 and text #FFFFFF (Increments by 1 directly)
                     FilledTonalIconButton(
                         onClick = { onValueChange(value + 1) },
                         modifier = Modifier
@@ -158,7 +184,7 @@ fun CounterItemCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Increase count",
+                            contentDescription = if (isTimeInMinutes) "वेळ १ मिनिट वाढवा" else "Increase count",
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -173,7 +199,29 @@ fun CounterItemCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                if (isJapaPreset) {
+                if (isTimeInMinutes) {
+                    if (language == AppLanguage.MARATHI) {
+                        QuickChip(label = "+१ मि.") { onValueChange(value + 1) }
+                        QuickChip(label = "+५ मि.") { onValueChange(value + 5) }
+                        QuickChip(label = "+१० मि.") { onValueChange(value + 10) }
+                        QuickChip(label = "+१५ मि.") { onValueChange(value + 15) }
+                        QuickChip(label = "+३० मि.") { onValueChange(value + 30) }
+                        QuickChip(label = "+६० मि. (१ तास)") { onValueChange(value + 60) }
+                        if (value > 0) {
+                            QuickChip(label = "स्वच्छ करा (०)", isReset = true) { onValueChange(0) }
+                        }
+                    } else {
+                        QuickChip(label = "+1 min") { onValueChange(value + 1) }
+                        QuickChip(label = "+5 min") { onValueChange(value + 5) }
+                        QuickChip(label = "+10 min") { onValueChange(value + 10) }
+                        QuickChip(label = "+15 min") { onValueChange(value + 15) }
+                        QuickChip(label = "+30 min") { onValueChange(value + 30) }
+                        QuickChip(label = "+60 min (1 hr)") { onValueChange(value + 60) }
+                        if (value > 0) {
+                            QuickChip(label = "Reset (0)", isReset = true) { onValueChange(0) }
+                        }
+                    }
+                } else if (isJapaPreset) {
                     QuickChip(label = "+108") { onValueChange(value + 108) }
                     QuickChip(label = "+500") { onValueChange(value + 500) }
                     QuickChip(label = "+1000") { onValueChange(value + 1000) }

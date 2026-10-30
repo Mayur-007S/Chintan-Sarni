@@ -32,6 +32,9 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -62,12 +65,15 @@ import com.example.localization.AppStrings
 import com.example.ui.components.BooleanCounterItemCard
 import com.example.ui.components.BooleanOnlyItemCard
 import com.example.ui.components.CounterItemCard
+import com.example.ui.components.RoutineDetailBottomSheet
+import com.example.ui.components.SubmittedEntriesSection
 import com.example.ui.components.WizardProgressHeader
 import com.example.ui.theme.ChaitanyaBlueDark
 import com.example.ui.theme.ChaitanyaBluePrimary
 import com.example.ui.theme.ChaitanyaCardBorder
 import com.example.ui.theme.ChaitanyaSkyContainer
 import com.example.ui.theme.ChaitanyaTextSecondary
+import com.example.ui.theme.ColorActiveStatus
 import com.example.ui.theme.ColorBackground
 import com.example.ui.theme.ColorComponentWhite
 import com.example.ui.theme.ColorNavigations
@@ -86,6 +92,9 @@ fun DailyWizardScreen(
     val activeLang by viewModel.activeLanguage.collectAsStateWithLifecycle()
     val currentStep by viewModel.currentStep.collectAsStateWithLifecycle()
     val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
+    val lastSubmittedEntry by viewModel.lastSubmittedEntry.collectAsStateWithLifecycle()
+    val allEntries by viewModel.allEntries.collectAsStateWithLifecycle()
+    val selectedDetailEntry by viewModel.selectedDetailEntry.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -107,6 +116,7 @@ fun DailyWizardScreen(
             language = activeLang,
             onTodayClick = { viewModel.selectDate(viewModel.getTodayDate()) },
             onYesterdayClick = { viewModel.selectDate(viewModel.getYesterdayDate()) },
+            onNewEntryClick = { viewModel.startNewEntry() },
             onPickDateClick = {
                 val cal = Calendar.getInstance()
                 val parts = selectedDate.split("-")
@@ -129,6 +139,70 @@ fun DailyWizardScreen(
             onStepClick = { step -> viewModel.setStep(step) },
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
+
+        // Sample 5 to 10 Fill Action Card / Banner
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 2.dp),
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = ColorNavigations // #D3EFFB
+            ),
+            border = BorderStroke(1.dp, ChaitanyaSkyContainer)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AutoFixHigh,
+                        contentDescription = null,
+                        tint = ChaitanyaBluePrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = if (activeLang == AppLanguage.MARATHI) "नमुना माहिती (५ ते १०)" else "Sample Values (5 to 10)",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = ChaitanyaBlueDark
+                        )
+                        Text(
+                            text = if (activeLang == AppLanguage.MARATHI) "सर्व घटकांत ५ ते १० मूल्ये भरा" else "Fill 5-10 in all components",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                            color = ChaitanyaBluePrimary
+                        )
+                    }
+                }
+
+                Button(
+                    onClick = { viewModel.fillSampleValues() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ChaitanyaBluePrimary,
+                        contentColor = ColorTextWhite
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                    modifier = Modifier
+                        .height(38.dp)
+                        .testTag("fill_sample_5_to_10_button")
+                ) {
+                    Text(
+                        text = AppStrings.fillSampleValuesButton(activeLang),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = ColorTextWhite
+                    )
+                }
+            }
+        }
 
         // Main Animated Wizard Content
         AnimatedContent(
@@ -180,12 +254,13 @@ fun DailyWizardScreen(
                         item {
                             CounterItemCard(
                                 title = AppStrings.kuldeviName(activeLang),
-                                subtitle = if (activeLang == AppLanguage.MARATHI) "कुलदेवीच्या नामजपाची संख्या" else "Kuldevi chanting repetitions",
+                                subtitle = AppStrings.kuldeviDesc(activeLang),
                                 value = draft.naamjapKuldevi,
                                 onValueChange = { newVal ->
                                     viewModel.updateDraft { it.copy(naamjapKuldevi = newVal) }
                                 },
-                                isJapaPreset = true,
+                                isTimeInMinutes = true,
+                                language = activeLang,
                                 testTag = "field_naamjap_kuldevi"
                             )
                         }
@@ -193,12 +268,13 @@ fun DailyWizardScreen(
                         item {
                             CounterItemCard(
                                 title = AppStrings.gurudevDattaName(activeLang),
-                                subtitle = if (activeLang == AppLanguage.MARATHI) "श्री गुरुदेव दत्त नामजप संख्या" else "Shri Gurudev Datta chanting repetitions",
+                                subtitle = AppStrings.gurudevDattaDesc(activeLang),
                                 value = draft.naamjapGurudevDatta,
                                 onValueChange = { newVal ->
                                     viewModel.updateDraft { it.copy(naamjapGurudevDatta = newVal) }
                                 },
-                                isJapaPreset = true,
+                                isTimeInMinutes = true,
+                                language = activeLang,
                                 testTag = "field_naamjap_gurudev_datta"
                             )
                         }
@@ -284,6 +360,19 @@ fun DailyWizardScreen(
                                     tint = ColorTextWhite
                                 )
                             }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                        // Submitted entries component (shows submitted data; clicking shows full details)
+                        item {
+                            SubmittedEntriesSection(
+                                lastSubmittedEntry = lastSubmittedEntry,
+                                allEntries = allEntries,
+                                language = activeLang,
+                                onEntryClick = { entry ->
+                                    viewModel.showEntryDetails(entry)
+                                }
+                            )
                             Spacer(modifier = Modifier.height(30.dp))
                         }
                     }
@@ -625,12 +714,26 @@ fun DailyWizardScreen(
 
                                     Column(horizontalAlignment = Alignment.End) {
                                         Text(
-                                            text = if (activeLang == AppLanguage.MARATHI) "एकूण नामजप" else "Total Naamjap",
+                                            text = if (activeLang == AppLanguage.MARATHI) "एकूण नामजप वेळ" else "Total Naamjap Time",
                                             style = MaterialTheme.typography.labelMedium,
                                             color = ChaitanyaTextSecondary
                                         )
+                                        val totalMins = draft.totalNaamjap
+                                        val formattedTotal = if (totalMins <= 0) {
+                                            if (activeLang == AppLanguage.MARATHI) "० मि." else "0 min"
+                                        } else if (totalMins < 60) {
+                                            if (activeLang == AppLanguage.MARATHI) "$totalMins मिनिटे" else "$totalMins mins"
+                                        } else {
+                                            val h = totalMins / 60
+                                            val m = totalMins % 60
+                                            if (activeLang == AppLanguage.MARATHI) {
+                                                if (m == 0) "$h तास" else "$h तास $m मि."
+                                            } else {
+                                                if (m == 0) "$h hr" else "$h hr $m min"
+                                            }
+                                        }
                                         Text(
-                                            text = "${draft.totalNaamjap}",
+                                            text = formattedTotal,
                                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                             color = ChaitanyaBluePrimary
                                         )
@@ -639,7 +742,7 @@ fun DailyWizardScreen(
                             }
                         }
 
-                        // Buttons: Previous & Save Chintan Sarani
+                        // Buttons: Previous & Save Chintan Sarani (Redirects to fresh entry)
                         item {
                             Spacer(modifier = Modifier.height(10.dp))
                             Row(
@@ -667,15 +770,17 @@ fun DailyWizardScreen(
 
                                 Button(
                                     onClick = {
-                                        viewModel.submitStep3()
+                                        viewModel.submitStep3 {
+                                            scope.launch { listState.scrollToItem(0) }
+                                        }
                                     },
                                     modifier = Modifier
-                                        .weight(1.3f)
+                                        .weight(1.4f)
                                         .height(52.dp)
                                         .testTag("submit_chintan_sarani_button"),
                                     shape = RoundedCornerShape(16.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = ChaitanyaBluePrimary,
+                                        containerColor = ColorActiveStatus, // #FD0031
                                         contentColor = ColorTextWhite
                                     )
                                 ) {
@@ -686,17 +791,42 @@ fun DailyWizardScreen(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = AppStrings.saveTodayEntry(activeLang),
+                                        text = if (activeLang == AppLanguage.MARATHI) "जतन करा आणि नवीन नोंद" else "Save & Fill New Entry",
                                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                         color = ColorTextWhite // #FFFFFF
                                     )
                                 }
                             }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                        // Submitted entries component in Step 3 as well
+                        item {
+                            SubmittedEntriesSection(
+                                lastSubmittedEntry = lastSubmittedEntry,
+                                allEntries = allEntries,
+                                language = activeLang,
+                                onEntryClick = { entry ->
+                                    viewModel.showEntryDetails(entry)
+                                }
+                            )
                             Spacer(modifier = Modifier.height(30.dp))
                         }
                     }
                 }
             }
+        }
+
+        // Full Detailed Data Bottom Sheet shown when any routine entry data is clicked
+        selectedDetailEntry?.let { entry ->
+            RoutineDetailBottomSheet(
+                entry = entry,
+                language = activeLang,
+                onDismiss = { viewModel.dismissEntryDetails() },
+                onEditEntry = { entryToEdit ->
+                    viewModel.loadEntryIntoDraft(entryToEdit)
+                }
+            )
         }
     }
 }
@@ -729,6 +859,7 @@ private fun DateSelectionBar(
     language: AppLanguage,
     onTodayClick: () -> Unit,
     onYesterdayClick: () -> Unit,
+    onNewEntryClick: () -> Unit,
     onPickDateClick: () -> Unit
 ) {
     Surface(
@@ -739,13 +870,13 @@ private fun DateSelectionBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 // Today button
                 DatePill(
@@ -762,6 +893,33 @@ private fun DateSelectionBar(
                     onClick = onYesterdayClick,
                     testTag = "date_yesterday_pill"
                 )
+
+                // New Entry / Clear button
+                Surface(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .clickable { onNewEntryClick() }
+                        .testTag("start_new_entry_pill"),
+                    color = ColorNavigations // #D3EFFB
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "New Entry",
+                            modifier = Modifier.size(14.dp),
+                            tint = ChaitanyaBlueDark
+                        )
+                        Text(
+                            text = AppStrings.newEntryButton(language),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = ChaitanyaBlueDark
+                        )
+                    }
+                }
             }
 
             // Calendar date picker button
@@ -773,9 +931,9 @@ private fun DateSelectionBar(
                 color = ColorNavigations // #D3EFFB
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.CalendarMonth,

@@ -161,5 +161,14 @@ data class DailyRoutineEntity(
    - Habit target adjustment sheet.
 5. **History & Calendar Navigator**:
    - Day selector to view or update any past routine record.
+   - Comprehensive **Search & Filter feature**:
+     - Fast date search (supports partial dates, e.g. "2026-10", "30", "2026-10-30").
+     - Search by specific practice name in Marathi & English (e.g. "नामजप" / "Naamjap", "प्रार्थना" / "Prayer", "कापूर" / "Camphor", "ग्रंथ" / "Reading", "चुका" / "Mistakes").
+     - Horizontal scrolling filter chips for all 17 spiritual practices (All, Naamjap, Camphor, Prayers, Gratitude, Aavaran, Bhavjagruti, Surrender, Mind Review, Holy Text, Journaling, Admitting Faults, Penance, Sarani, Writing Mistakes, Autosuggestion, Forgiveness).
+     - Live result counter ("X of Y entries") and instant reset button.
+     - Custom highlight badges in history item cards for the filtered practice.
+     - Empty state with reset filter button when no entries match.
+     - Clickable items to open full 17-practice detail bottom sheet with edit capability.
 6. **Compilation & Polish**:
    - Verify smooth edge-to-edge rendering, Material 3 theming, touch target guidelines, and compile clean.
+
