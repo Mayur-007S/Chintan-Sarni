@@ -25,12 +25,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -47,6 +49,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -86,6 +91,7 @@ fun HistoryScreen(
     val searchQuery by viewModel.historySearchQuery.collectAsStateWithLifecycle()
     val selectedFilter by viewModel.historyPracticeFilter.collectAsStateWithLifecycle()
     val selectedDetailEntry by viewModel.selectedDetailEntry.collectAsStateWithLifecycle()
+    var pendingDeleteEntry by remember { mutableStateOf<DailyRoutineEntity?>(null) }
 
     // SAF Document Creator launcher to save CSV to local storage without broad storage permissions
     val saveDocumentLauncher = rememberLauncherForActivityResult(
@@ -507,6 +513,9 @@ fun HistoryScreen(
                         selectedFilter = selectedFilter,
                         onClick = {
                             viewModel.showEntryDetails(entry)
+                        },
+                        onDeleteClick = {
+                            pendingDeleteEntry = entry
                         }
                     )
                 }
@@ -526,7 +535,64 @@ fun HistoryScreen(
                 onEditEntry = { entryToEdit ->
                     viewModel.loadEntryIntoDraft(entryToEdit)
                     onSelectDate(entryToEdit.date)
+                },
+                onDeleteEntry = { entryToDelete ->
+                    viewModel.deleteEntry(entryToDelete.date)
                 }
+            )
+        }
+
+        // Confirmation dialog when deleting directly from a history card
+        pendingDeleteEntry?.let { entryToDelete ->
+            AlertDialog(
+                onDismissRequest = { pendingDeleteEntry = null },
+                title = {
+                    Text(
+                        text = AppStrings.deleteEntryConfirmTitle(activeLang),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = ChaitanyaBluePrimary
+                    )
+                },
+                text = {
+                    Text(
+                        text = AppStrings.deleteEntryConfirmMessage(activeLang, entryToDelete.date),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = ChaitanyaTextSecondary
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.deleteEntry(entryToDelete.date)
+                            pendingDeleteEntry = null
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ColorActiveStatus,
+                            contentColor = ColorTextWhite
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.testTag("btn_confirm_delete_history_dialog")
+                    ) {
+                        Text(
+                            text = AppStrings.deleteAction(activeLang),
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(
+                        onClick = { pendingDeleteEntry = null },
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.testTag("btn_cancel_delete_history_dialog")
+                    ) {
+                        Text(
+                            text = AppStrings.deleteCancel(activeLang),
+                            color = ChaitanyaBlueDark
+                        )
+                    }
+                },
+                shape = RoundedCornerShape(18.dp),
+                containerColor = ColorComponentWhite
             )
         }
     }
@@ -587,7 +653,8 @@ private fun HistoryItemCard(
     entry: DailyRoutineEntity,
     language: AppLanguage,
     selectedFilter: PracticeFilter,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -707,12 +774,32 @@ private fun HistoryItemCard(
                 }
             }
 
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = "View detail",
-                tint = ChaitanyaTextSecondary,
-                modifier = Modifier.size(24.dp)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = onDeleteClick,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .testTag("btn_delete_history_${entry.date}")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DeleteOutline,
+                        contentDescription = AppStrings.deleteButtonContentDescription(language),
+                        tint = ColorActiveStatus,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(2.dp))
+
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = "View detail",
+                    tint = ChaitanyaTextSecondary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
         }
     }
 }

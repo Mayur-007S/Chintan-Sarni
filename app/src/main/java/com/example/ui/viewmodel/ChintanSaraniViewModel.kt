@@ -288,11 +288,9 @@ class ChintanSaraniViewModel(application: Application) : AndroidViewModel(applic
                     else -> 1
                 }
             } else {
-                // If no entry or empty, populate with sample values between 5 and 10
-                val sample = createSampleRoutine(date)
-                _currentDraft.value = sample
+                // If no entry or empty, start with clean draft for user entry
+                _currentDraft.value = existing ?: DailyRoutineEntity(date = date)
                 _currentStep.value = 1
-                repository.saveEntry(sample)
             }
         }
     }
@@ -391,6 +389,27 @@ class ChintanSaraniViewModel(application: Application) : AndroidViewModel(applic
             "नवीन नोंदीसाठी फॉर्म पूर्ववत (Clear) करण्यात आला आहे."
         } else {
             "Form cleared and reset for new entry."
+        }
+    }
+
+    /**
+     * Deletes a daily routine entry for the specified date from the database
+     * and clears associated detail/draft states if active.
+     */
+    fun deleteEntry(date: String) {
+        viewModelScope.launch {
+            repository.deleteEntry(date)
+            if (_selectedDetailEntry.value?.date == date) {
+                _selectedDetailEntry.value = null
+            }
+            if (_lastSubmittedEntry.value?.date == date) {
+                _lastSubmittedEntry.value = null
+            }
+            if (_selectedDate.value == date) {
+                _currentDraft.value = DailyRoutineEntity(date = date)
+                _currentStep.value = 1
+            }
+            _snackbarMessage.value = AppStrings.deleteSuccessSnackbar(_activeLanguage.value, date)
         }
     }
 

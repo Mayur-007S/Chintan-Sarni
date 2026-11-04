@@ -517,4 +517,35 @@ object AppStrings {
         AppLanguage.MARATHI -> "क्षमायाचना"
         AppLanguage.ENGLISH -> "Forgiveness"
     }
+
+    fun deleteAction(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "हटवा"
+        AppLanguage.ENGLISH -> "Delete"
+    }
+
+    fun deleteEntryConfirmTitle(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "नोंद हटवायची आहे का?"
+        AppLanguage.ENGLISH -> "Delete Routine Entry?"
+    }
+
+    fun deleteEntryConfirmMessage(lang: AppLanguage, date: String) = when (lang) {
+        AppLanguage.MARATHI -> "तुम्हाला खात्री आहे का की तुम्ही $date ची नोंद कायमची हटवू इच्छिता? ही क्रिया पूर्ववत करता येणार नाही."
+        AppLanguage.ENGLISH -> "Are you sure you want to permanently delete the entry for $date? This action cannot be undone."
+    }
+
+    fun deleteCancel(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "रद्द करा"
+        AppLanguage.ENGLISH -> "Cancel"
+    }
+
+    fun deleteSuccessSnackbar(lang: AppLanguage, date: String) = when (lang) {
+        AppLanguage.MARATHI -> "✓ $date ची नोंद यशस्वीरीत्या हटवली गेली."
+        AppLanguage.ENGLISH -> "✓ Entry for $date deleted successfully."
+    }
+
+    fun deleteButtonContentDescription(lang: AppLanguage) = when (lang) {
+        AppLanguage.MARATHI -> "नोंद हटवा"
+        AppLanguage.ENGLISH -> "Delete entry"
+    }
 }
+

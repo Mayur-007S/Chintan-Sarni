@@ -22,12 +22,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -43,6 +45,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -53,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.DailyRoutineEntity
 import com.example.localization.AppLanguage
+import com.example.localization.AppStrings
 import com.example.ui.theme.ChaitanyaBlueDark
 import com.example.ui.theme.ChaitanyaBluePrimary
 import com.example.ui.theme.ChaitanyaCardBorder
@@ -72,10 +79,12 @@ fun RoutineDetailBottomSheet(
     language: AppLanguage,
     onDismiss: () -> Unit,
     onEditEntry: (DailyRoutineEntity) -> Unit,
+    onDeleteEntry: ((DailyRoutineEntity) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -133,17 +142,35 @@ fun RoutineDetailBottomSheet(
                         }
                     }
 
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .testTag("btn_close_detail_sheet")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
-                            tint = ChaitanyaBluePrimary
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (onDeleteEntry != null) {
+                            IconButton(
+                                onClick = { showDeleteConfirmDialog = true },
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .testTag("btn_delete_detail_sheet_top")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DeleteOutline,
+                                    contentDescription = AppStrings.deleteButtonContentDescription(language),
+                                    tint = ColorActiveStatus
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                        }
+
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .testTag("btn_close_detail_sheet")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = ChaitanyaBluePrimary
+                            )
+                        }
                     }
                 }
             }
@@ -370,7 +397,7 @@ fun RoutineDetailBottomSheet(
                 // Bottom Action Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Button(
                         onClick = {
@@ -378,10 +405,10 @@ fun RoutineDetailBottomSheet(
                             onDismiss()
                         },
                         modifier = Modifier
-                            .weight(1.2f)
-                            .height(50.dp)
+                            .weight(1.1f)
+                            .height(48.dp)
                             .testTag("btn_edit_detail_entry"),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = ColorActiveStatus, // #FD0031
                             contentColor = ColorTextWhite       // #FFFFFF
@@ -391,11 +418,11 @@ fun RoutineDetailBottomSheet(
                             imageVector = Icons.Default.Edit,
                             contentDescription = null,
                             tint = ColorTextWhite,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = if (language == AppLanguage.MARATHI) "फॉर्ममध्ये बदला" else "Edit in Form",
+                            text = if (language == AppLanguage.MARATHI) "बदला" else "Edit",
                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                             color = ColorTextWhite
                         )
@@ -407,27 +434,108 @@ fun RoutineDetailBottomSheet(
                         },
                         modifier = Modifier
                             .weight(1f)
-                            .height(50.dp)
+                            .height(48.dp)
                             .testTag("btn_share_detail_entry"),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, ChaitanyaBluePrimary.copy(alpha = 0.5f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.Share,
                             contentDescription = null,
                             tint = ChaitanyaBluePrimary,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = if (language == AppLanguage.MARATHI) "शेअर करा" else "Share",
+                            text = if (language == AppLanguage.MARATHI) "शेअर" else "Share",
                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                             color = ChaitanyaBluePrimary
                         )
                     }
+
+                    if (onDeleteEntry != null) {
+                        OutlinedButton(
+                            onClick = {
+                                showDeleteConfirmDialog = true
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp)
+                                .testTag("btn_delete_detail_entry"),
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, ColorActiveStatus.copy(alpha = 0.6f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DeleteOutline,
+                                contentDescription = null,
+                                tint = ColorActiveStatus,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = AppStrings.deleteAction(language),
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = ColorActiveStatus
+                            )
+                        }
+                    }
                 }
             }
         }
+    }
+
+    if (showDeleteConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmDialog = false },
+            title = {
+                Text(
+                    text = AppStrings.deleteEntryConfirmTitle(language),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = ChaitanyaBluePrimary
+                )
+            },
+            text = {
+                Text(
+                    text = AppStrings.deleteEntryConfirmMessage(language, entry.date),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = ChaitanyaTextSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteConfirmDialog = false
+                        onDeleteEntry?.invoke(entry)
+                        onDismiss()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ColorActiveStatus,
+                        contentColor = ColorTextWhite
+                    ),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.testTag("btn_confirm_delete_detail_entry")
+                ) {
+                    Text(
+                        text = AppStrings.deleteAction(language),
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showDeleteConfirmDialog = false },
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.testTag("btn_cancel_delete_detail_entry")
+                ) {
+                    Text(
+                        text = AppStrings.deleteCancel(language),
+                        color = ChaitanyaBlueDark
+                    )
+                }
+            },
+            shape = RoundedCornerShape(18.dp),
+            containerColor = ColorComponentWhite
+        )
     }
 }
 

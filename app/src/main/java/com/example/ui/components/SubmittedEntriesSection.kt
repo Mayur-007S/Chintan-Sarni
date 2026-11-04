@@ -1,7 +1,6 @@
 package com.example.ui.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,17 +15,26 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -35,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.DailyRoutineEntity
 import com.example.localization.AppLanguage
+import com.example.localization.AppStrings
 import com.example.ui.theme.ChaitanyaBlueDark
 import com.example.ui.theme.ChaitanyaBluePrimary
 import com.example.ui.theme.ChaitanyaCardBorder
@@ -51,11 +60,28 @@ fun SubmittedEntriesSection(
     allEntries: List<DailyRoutineEntity>,
     language: AppLanguage,
     onEntryClick: (DailyRoutineEntity) -> Unit,
+    onDeleteEntry: ((DailyRoutineEntity) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    if (lastSubmittedEntry == null && allEntries.isEmpty()) {
+    // Only display up to 5 most recently added/submitted entries
+    val recentEntries = remember(allEntries, lastSubmittedEntry) {
+        val list = mutableListOf<DailyRoutineEntity>()
+        if (lastSubmittedEntry != null) {
+            list.add(lastSubmittedEntry)
+        }
+        allEntries.filter { it.date != lastSubmittedEntry?.date }.forEach { entry ->
+            if (list.size < 5) {
+                list.add(entry)
+            }
+        }
+        list
+    }
+
+    if (recentEntries.isEmpty()) {
         return
     }
+
+    var pendingDeleteEntry by remember { mutableStateOf<DailyRoutineEntity?>(null) }
 
     Column(
         modifier = modifier
@@ -86,7 +112,10 @@ fun SubmittedEntriesSection(
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (language == AppLanguage.MARATHI) "नोंदवलेली माहिती (सेव्ह केलेल्या नोंदी)" else "Submitted Routine Records",
+                    text = if (language == AppLanguage.MARATHI)
+                        "नोंदवलेली माहिती (शेवटच्या ५ नोंदी)"
+                    else
+                        "Recent Submitted Records (Last 5)",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = ChaitanyaBluePrimary
                 )
@@ -99,46 +128,69 @@ fun SubmittedEntriesSection(
             )
         }
 
-        // 1) Highlight Recently Submitted Entry if present
-        if (lastSubmittedEntry != null) {
-            Card(
+        // 1) Featured Top Entry (Most recent or just submitted)
+        val featuredEntry = recentEntries.first()
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onEntryClick(featuredEntry) }
+                .testTag("card_last_submitted_entry"),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = ColorComponentWhite),
+            border = BorderStroke(1.5.dp, ColorActiveStatus.copy(alpha = 0.7f)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onEntryClick(lastSubmittedEntry) }
-                    .testTag("card_last_submitted_entry"),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = ColorComponentWhite),
-                border = BorderStroke(1.5.dp, ColorActiveStatus.copy(alpha = 0.7f)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    .padding(14.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(14.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = ColorActiveStatus // #FD0031
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = ColorActiveStatus // #FD0031
+                        ) {
+                            Text(
+                                text = if (featuredEntry.date == lastSubmittedEntry?.date) {
+                                    if (language == AppLanguage.MARATHI) "✓ आत्ताच सेव्ह झाली" else "✓ Just Submitted"
+                                } else {
+                                    if (language == AppLanguage.MARATHI) "✓ नवीनतम नोंद" else "✓ Latest Entry"
+                                },
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = ColorTextWhite,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = featuredEntry.date,
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            color = ChaitanyaBluePrimary
+                        )
+                    }
+
+                    // Delete button pointing exactly where the user requested next to the chevron
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (onDeleteEntry != null) {
+                            IconButton(
+                                onClick = { pendingDeleteEntry = featuredEntry },
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .testTag("btn_delete_submitted_${featuredEntry.date}")
                             ) {
-                                Text(
-                                    text = if (language == AppLanguage.MARATHI) "✓ आत्ताच सेव्ह झाली" else "✓ Just Submitted",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = ColorTextWhite,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                Icon(
+                                    imageVector = Icons.Default.DeleteOutline,
+                                    contentDescription = AppStrings.deleteButtonContentDescription(language),
+                                    tint = ColorActiveStatus,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = lastSubmittedEntry.date,
-                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                color = ChaitanyaBluePrimary
-                            )
+                            Spacer(modifier = Modifier.width(2.dp))
                         }
 
                         Icon(
@@ -148,101 +200,153 @@ fun SubmittedEntriesSection(
                             modifier = Modifier.size(20.dp)
                         )
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    // Naamjap time pill
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = ColorNavigations,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        // Naamjap time pill
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = ColorNavigations,
-                            modifier = Modifier.weight(1f)
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Timer,
-                                    contentDescription = null,
-                                    tint = ColorActiveStatus,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                val mins = lastSubmittedEntry.totalNaamjap
-                                val timeText = if (mins < 60) {
-                                    if (language == AppLanguage.MARATHI) "$mins मि." else "$mins min"
-                                } else {
-                                    val h = mins / 60
-                                    val m = mins % 60
-                                    if (language == AppLanguage.MARATHI) "${h}ता ${m}मि" else "${h}h ${m}m"
-                                }
-                                Text(
-                                    text = if (language == AppLanguage.MARATHI) "नामजप: $timeText" else "Naamjap: $timeText",
-                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                                    color = ChaitanyaBlueDark,
-                                    fontSize = 11.sp
-                                )
+                            Icon(
+                                imageVector = Icons.Default.Timer,
+                                contentDescription = null,
+                                tint = ColorActiveStatus,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            val mins = featuredEntry.totalNaamjap
+                            val timeText = if (mins < 60) {
+                                if (language == AppLanguage.MARATHI) "$mins मि." else "$mins min"
+                            } else {
+                                val h = mins / 60
+                                val m = mins % 60
+                                if (language == AppLanguage.MARATHI) "${h}ता ${m}मि" else "${h}h ${m}m"
                             }
-                        }
-
-                        // Habits completed pill
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = ChaitanyaSkyContainer,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.SelfImprovement,
-                                    contentDescription = null,
-                                    tint = ChaitanyaBluePrimary,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "${lastSubmittedEntry.completedHabitsCount}/${lastSubmittedEntry.totalHabitsCount} " +
-                                            if (language == AppLanguage.MARATHI) "सवयी" else "habits",
-                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                                    color = ChaitanyaBlueDark,
-                                    fontSize = 11.sp
-                                )
-                            }
+                            Text(
+                                text = if (language == AppLanguage.MARATHI) "नामजप: $timeText" else "Naamjap: $timeText",
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                                color = ChaitanyaBlueDark,
+                                fontSize = 11.sp
+                            )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Text(
-                        text = if (language == AppLanguage.MARATHI)
-                            "👉 संपूर्ण तपशील (नामजप वेळ, उपाय, ग्रंथ पठण इत्यादी) पाहण्यासाठी येथे टॅप करा"
-                        else
-                            "👉 Tap here to view full detailed routine breakdown",
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                        color = ColorActiveStatus
-                    )
+                    // Habits completed pill
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = ChaitanyaSkyContainer,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.SelfImprovement,
+                                contentDescription = null,
+                                tint = ChaitanyaBluePrimary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "${featuredEntry.completedHabitsCount}/${featuredEntry.totalHabitsCount} " +
+                                        if (language == AppLanguage.MARATHI) "सवयी" else "habits",
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                                color = ChaitanyaBlueDark,
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = if (language == AppLanguage.MARATHI)
+                        "👉 संपूर्ण तपशील (नामजप वेळ, उपाय, ग्रंथ पठण इत्यादी) पाहण्यासाठी येथे टॅप करा"
+                    else
+                        "👉 Tap here to view full detailed routine breakdown",
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                    color = ColorActiveStatus
+                )
             }
         }
 
-        // 2) List other submitted entries (up to 4 recent)
-        val otherEntries = allEntries
-            .filter { it.date != lastSubmittedEntry?.date }
-            .take(3)
-
+        // 2) List other submitted entries up to 5 total
+        val otherEntries = recentEntries.drop(1)
         otherEntries.forEach { entry ->
             SubmittedEntryCompactCard(
                 entry = entry,
                 language = language,
-                onClick = { onEntryClick(entry) }
+                onClick = { onEntryClick(entry) },
+                onDeleteClick = if (onDeleteEntry != null) { { pendingDeleteEntry = entry } } else null
             )
         }
+    }
+
+    // Confirmation dialog before deleting
+    pendingDeleteEntry?.let { entryToDelete ->
+        AlertDialog(
+            onDismissRequest = { pendingDeleteEntry = null },
+            title = {
+                Text(
+                    text = AppStrings.deleteEntryConfirmTitle(language),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = ChaitanyaBluePrimary
+                )
+            },
+            text = {
+                Text(
+                    text = AppStrings.deleteEntryConfirmMessage(language, entryToDelete.date),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = ChaitanyaTextSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDeleteEntry?.invoke(entryToDelete)
+                        pendingDeleteEntry = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ColorActiveStatus,
+                        contentColor = ColorTextWhite
+                    ),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.testTag("btn_confirm_delete_submitted_entry")
+                ) {
+                    Text(
+                        text = AppStrings.deleteAction(language),
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { pendingDeleteEntry = null },
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.testTag("btn_cancel_delete_submitted_entry")
+                ) {
+                    Text(
+                        text = AppStrings.deleteCancel(language),
+                        color = ChaitanyaBlueDark
+                    )
+                }
+            },
+            shape = RoundedCornerShape(18.dp),
+            containerColor = ColorComponentWhite
+        )
     }
 }
 
@@ -250,7 +354,8 @@ fun SubmittedEntriesSection(
 private fun SubmittedEntryCompactCard(
     entry: DailyRoutineEntity,
     language: AppLanguage,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onDeleteClick: (() -> Unit)? = null
 ) {
     Card(
         modifier = Modifier
@@ -269,7 +374,7 @@ private fun SubmittedEntryCompactCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = entry.date,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
@@ -297,7 +402,26 @@ private fun SubmittedEntryCompactCard(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(4.dp))
+
+                if (onDeleteClick != null) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    IconButton(
+                        onClick = onDeleteClick,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .testTag("btn_delete_compact_${entry.date}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteOutline,
+                            contentDescription = AppStrings.deleteButtonContentDescription(language),
+                            tint = ColorActiveStatus,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                } else {
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = "View detail",

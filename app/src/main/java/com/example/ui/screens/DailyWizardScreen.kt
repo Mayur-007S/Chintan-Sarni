@@ -33,7 +33,6 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Button
@@ -139,70 +138,6 @@ fun DailyWizardScreen(
             onStepClick = { step -> viewModel.setStep(step) },
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
-
-        // Sample 5 to 10 Fill Action Card / Banner
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 2.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = ColorNavigations // #D3EFFB
-            ),
-            border = BorderStroke(1.dp, ChaitanyaSkyContainer)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AutoFixHigh,
-                        contentDescription = null,
-                        tint = ChaitanyaBluePrimary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column {
-                        Text(
-                            text = if (activeLang == AppLanguage.MARATHI) "नमुना माहिती (५ ते १०)" else "Sample Values (5 to 10)",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = ChaitanyaBlueDark
-                        )
-                        Text(
-                            text = if (activeLang == AppLanguage.MARATHI) "सर्व घटकांत ५ ते १० मूल्ये भरा" else "Fill 5-10 in all components",
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                            color = ChaitanyaBluePrimary
-                        )
-                    }
-                }
-
-                Button(
-                    onClick = { viewModel.fillSampleValues() },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ChaitanyaBluePrimary,
-                        contentColor = ColorTextWhite
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                    modifier = Modifier
-                        .height(38.dp)
-                        .testTag("fill_sample_5_to_10_button")
-                ) {
-                    Text(
-                        text = AppStrings.fillSampleValuesButton(activeLang),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = ColorTextWhite
-                    )
-                }
-            }
-        }
 
         // Main Animated Wizard Content
         AnimatedContent(
@@ -371,6 +306,9 @@ fun DailyWizardScreen(
                                 language = activeLang,
                                 onEntryClick = { entry ->
                                     viewModel.showEntryDetails(entry)
+                                },
+                                onDeleteEntry = { entry ->
+                                    viewModel.deleteEntry(entry.date)
                                 }
                             )
                             Spacer(modifier = Modifier.height(30.dp))
@@ -519,6 +457,22 @@ fun DailyWizardScreen(
                                     )
                                 }
                             }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                        // Submitted entries component in Step 2 as well
+                        item {
+                            SubmittedEntriesSection(
+                                lastSubmittedEntry = lastSubmittedEntry,
+                                allEntries = allEntries,
+                                language = activeLang,
+                                onEntryClick = { entry ->
+                                    viewModel.showEntryDetails(entry)
+                                },
+                                onDeleteEntry = { entry ->
+                                    viewModel.deleteEntry(entry.date)
+                                }
+                            )
                             Spacer(modifier = Modifier.height(30.dp))
                         }
                     }
@@ -808,6 +762,9 @@ fun DailyWizardScreen(
                                 language = activeLang,
                                 onEntryClick = { entry ->
                                     viewModel.showEntryDetails(entry)
+                                },
+                                onDeleteEntry = { entry ->
+                                    viewModel.deleteEntry(entry.date)
                                 }
                             )
                             Spacer(modifier = Modifier.height(30.dp))
@@ -825,6 +782,9 @@ fun DailyWizardScreen(
                 onDismiss = { viewModel.dismissEntryDetails() },
                 onEditEntry = { entryToEdit ->
                     viewModel.loadEntryIntoDraft(entryToEdit)
+                },
+                onDeleteEntry = { entryToDelete ->
+                    viewModel.deleteEntry(entryToDelete.date)
                 }
             )
         }
