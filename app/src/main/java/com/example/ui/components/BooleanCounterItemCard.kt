@@ -103,7 +103,8 @@ fun BooleanCounterItemCard(
                         text = title,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            lineHeight = 22.sp
+                            fontSize = 15.sp,
+                            lineHeight = 20.sp
                         ),
                         color = ChaitanyaBluePrimary
                     )
@@ -111,13 +112,16 @@ fun BooleanCounterItemCard(
                         Spacer(modifier = Modifier.height(3.dp))
                         Text(
                             text = subtitle,
-                            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 16.sp),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 11.5.sp,
+                                lineHeight = 15.sp
+                            ),
                             color = ChaitanyaTextSecondary
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 // Yes / No pill selector with exact active status #FD0031
                 YesNoSwitchPill(
@@ -283,25 +287,25 @@ fun YesNoSwitchPill(
                         else Color.Transparent
                     )
                     .clickable { onToggle(false) }
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                    .padding(horizontal = 8.dp, vertical = 5.dp)
                     .testTag("${testTag}_no"),
                 contentAlignment = Alignment.Center
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
                     if (!isYes) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = null,
-                            modifier = Modifier.size(13.dp),
+                            modifier = Modifier.size(12.dp),
                             tint = Color(0xFF475569)
                         )
                     }
                     Text(
                         text = AppStrings.noLabel(language),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 11.5.sp),
                         color = if (!isYes) Color(0xFF1E293B)
                         else ChaitanyaTextSecondary
                     )
@@ -319,25 +323,25 @@ fun YesNoSwitchPill(
                         else Color.Transparent
                     )
                     .clickable { onToggle(true) }
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                    .padding(horizontal = 8.dp, vertical = 5.dp)
                     .testTag("${testTag}_yes"),
                 contentAlignment = Alignment.Center
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
                     if (isYes) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            modifier = Modifier.size(13.dp),
+                            modifier = Modifier.size(12.dp),
                             tint = ColorTextWhite // #FFFFFF
                         )
                     }
                     Text(
                         text = AppStrings.yesLabel(language),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontSize = 11.5.sp),
                         color = if (isYes) ColorTextWhite // #FFFFFF
                         else ChaitanyaTextSecondary
                     )

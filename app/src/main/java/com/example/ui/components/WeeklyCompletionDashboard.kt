@@ -13,6 +13,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -424,15 +426,20 @@ fun WeeklyCompletionDashboard(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
                                     Text(
                                         text = "${inspectedDay.dayLabel}, ${inspectedDay.dateStr}",
                                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = ChaitanyaBluePrimary
+                                        color = ChaitanyaBluePrimary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f, fill = false)
                                     )
                                     if (inspectedDay.isSelected) {
-                                        Spacer(modifier = Modifier.width(6.dp))
                                         Surface(
                                             shape = RoundedCornerShape(4.dp),
                                             color = ColorActiveStatus
@@ -441,26 +448,33 @@ fun WeeklyCompletionDashboard(
                                                 text = if (language == AppLanguage.MARATHI) "निवडलेला दिवस" else "Selected",
                                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold),
                                                 color = ColorTextWhite,
-                                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.5.dp),
+                                                maxLines = 1,
+                                                softWrap = false
                                             )
                                         }
                                     }
                                 }
-                                Spacer(modifier = Modifier.height(2.dp))
+                                Spacer(modifier = Modifier.height(3.dp))
                                 Text(
                                     text = if (language == AppLanguage.MARATHI)
                                         "${inspectedDay.habitsCompleted} पैकी ${inspectedDay.totalHabits} सवयी पूर्ण (%.0f%%)".format(inspectedDay.completionPercentage)
                                     else
                                         "${inspectedDay.habitsCompleted} of ${inspectedDay.totalHabits} practices done (%.0f%%)".format(inspectedDay.completionPercentage),
-                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-                                    color = if (inspectedDay.completionPercentage >= 70f) ColorActiveStatus else ChaitanyaBlueDark
+                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold, fontSize = 11.5.sp),
+                                    color = if (inspectedDay.completionPercentage >= 70f) ColorActiveStatus else ChaitanyaBlueDark,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
 
-                            // Open Daily Routine Button
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            // Open Daily Routine Button with compact padding
                             Button(
                                 onClick = { onDayClick(inspectedDay.dateStr) },
                                 shape = RoundedCornerShape(10.dp),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = ColorActiveStatus, // #FD0031
                                     contentColor = ColorTextWhite
@@ -471,7 +485,9 @@ fun WeeklyCompletionDashboard(
                                     Text(
                                         text = if (language == AppLanguage.MARATHI) "सारणी उघडा" else "Open Routine",
                                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = ColorTextWhite
+                                        color = ColorTextWhite,
+                                        maxLines = 1,
+                                        softWrap = false
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Icon(

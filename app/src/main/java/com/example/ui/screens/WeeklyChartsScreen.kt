@@ -64,6 +64,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -549,7 +550,10 @@ private fun WeekNavigatorCard(
                 )
             }
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 val startLabel = weeklyDays.firstOrNull()?.fullDateLabel ?: ""
                 val endLabel = weeklyDays.lastOrNull()?.fullDateLabel ?: ""
                 val dateRangeText = if (startLabel.isNotEmpty() && endLabel.isNotEmpty()) {
@@ -560,7 +564,9 @@ private fun WeekNavigatorCard(
                 Text(
                     text = dateRangeText,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = ChaitanyaBluePrimary
+                    color = ChaitanyaBluePrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 if (weekOffset != 0) {

@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.DailyRoutineEntity
@@ -63,17 +64,20 @@ fun SubmittedEntriesSection(
     onDeleteEntry: ((DailyRoutineEntity) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    // Only display up to 5 most recently added/submitted entries
+    // Only display up to 5 most recently added/submitted entries (completedSteps >= 3)
     val recentEntries = remember(allEntries, lastSubmittedEntry) {
         val list = mutableListOf<DailyRoutineEntity>()
-        if (lastSubmittedEntry != null) {
+        if (lastSubmittedEntry != null && lastSubmittedEntry.completedSteps >= 3) {
             list.add(lastSubmittedEntry)
         }
-        allEntries.filter { it.date != lastSubmittedEntry?.date }.forEach { entry ->
-            if (list.size < 5) {
-                list.add(entry)
+        allEntries
+            .filter { it.completedSteps >= 3 && it.date != lastSubmittedEntry?.date }
+            .sortedByDescending { it.date }
+            .forEach { entry ->
+                if (list.size < 5) {
+                    list.add(entry)
+                }
             }
-        }
         list
     }
 
@@ -95,7 +99,10 @@ fun SubmittedEntriesSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.weight(1f, fill = false),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = ColorNavigations, // #D3EFFB
@@ -115,16 +122,21 @@ fun SubmittedEntriesSection(
                     text = if (language == AppLanguage.MARATHI)
                         "नोंदवलेली माहिती (शेवटच्या ५ नोंदी)"
                     else
-                        "Recent Submitted Records (Last 5)",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = ChaitanyaBluePrimary
+                        "Recent Records (Last 5)",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp),
+                    color = ChaitanyaBluePrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+
+            Spacer(modifier = Modifier.width(6.dp))
 
             Text(
                 text = if (language == AppLanguage.MARATHI) "तपशीलासाठी टॅप करा" else "Tap for details",
                 style = MaterialTheme.typography.labelSmall,
-                color = ChaitanyaTextSecondary
+                color = ChaitanyaTextSecondary,
+                maxLines = 1
             )
         }
 
@@ -150,27 +162,33 @@ fun SubmittedEntriesSection(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.weight(1f, fill = false),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
                             color = ColorActiveStatus // #FD0031
                         ) {
                             Text(
                                 text = if (featuredEntry.date == lastSubmittedEntry?.date) {
-                                    if (language == AppLanguage.MARATHI) "✓ आत्ताच सेव्ह झाली" else "✓ Just Submitted"
+                                    if (language == AppLanguage.MARATHI) "✓ आत्ताच सेव्ह झाली" else "✓ Just Saved"
                                 } else {
-                                    if (language == AppLanguage.MARATHI) "✓ नवीनतम नोंद" else "✓ Latest Entry"
+                                    if (language == AppLanguage.MARATHI) "✓ नवीनतम नोंद" else "✓ Latest"
                                 },
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.5.sp),
                                 color = ColorTextWhite,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
+                                maxLines = 1,
+                                softWrap = false
                             )
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = featuredEntry.date,
                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                            color = ChaitanyaBluePrimary
+                            color = ChaitanyaBluePrimary,
+                            maxLines = 1
                         )
                     }
 
@@ -382,11 +400,21 @@ private fun SubmittedEntryCompactCard(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 val mins = entry.totalNaamjap
-                val timeFormatted = if (mins < 60) "$mins मि." else "${mins / 60} तास ${mins % 60} मि."
+                val timeFormatted = if (mins < 60) {
+                    if (language == AppLanguage.MARATHI) "$mins मि." else "$mins min"
+                } else {
+                    val h = mins / 60
+                    val m = mins % 60
+                    if (language == AppLanguage.MARATHI) "$h तास $m मि." else "$h hr $m min"
+                }
+                val habitsWord = if (language == AppLanguage.MARATHI) "सवयी" else "habits"
+                val naamjapWord = if (language == AppLanguage.MARATHI) "नामजप" else "Naamjap"
                 Text(
-                    text = "${entry.completedHabitsCount}/${entry.totalHabitsCount} सवयी • नामजप: $timeFormatted",
+                    text = "${entry.completedHabitsCount}/${entry.totalHabitsCount} $habitsWord • $naamjapWord: $timeFormatted",
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                    color = ChaitanyaTextSecondary
+                    color = ChaitanyaTextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 

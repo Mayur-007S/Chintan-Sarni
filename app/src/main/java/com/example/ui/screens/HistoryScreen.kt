@@ -58,6 +58,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -259,8 +260,13 @@ fun HistoryScreen(
                                         allEntries.size
                                     ),
                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                                    color = ChaitanyaBlueDark
+                                    color = ChaitanyaBlueDark,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
+
+                                Spacer(modifier = Modifier.width(6.dp))
 
                                 Text(
                                     text = AppStrings.resetFilters(activeLang),
@@ -271,7 +277,8 @@ fun HistoryScreen(
                                     modifier = Modifier
                                         .clickable { viewModel.resetHistoryFilters() }
                                         .padding(vertical = 4.dp, horizontal = 6.dp)
-                                        .testTag("btn_reset_history_filters")
+                                        .testTag("btn_reset_history_filters"),
+                                    maxLines = 1
                                 )
                             }
                         }

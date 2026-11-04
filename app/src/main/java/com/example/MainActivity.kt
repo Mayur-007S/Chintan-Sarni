@@ -71,6 +71,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -165,9 +166,12 @@ fun MainAppScreen(viewModel: ChintanSaraniViewModel) {
                 // Top Heading Component with exact #FFFFCB
                 TopAppBar(
                     title = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             Surface(
-                                modifier = Modifier.size(38.dp),
+                                modifier = Modifier.size(36.dp),
                                 shape = CircleShape,
                                 color = ColorComponentWhite,
                                 border = BorderStroke(1.dp, ChaitanyaBluePrimary.copy(alpha = 0.3f))
@@ -177,26 +181,30 @@ fun MainAppScreen(viewModel: ChintanSaraniViewModel) {
                                         text = "ॐ",
                                         style = MaterialTheme.typography.titleMedium.copy(
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 20.sp
+                                            fontSize = 19.sp
                                         ),
                                         color = ChaitanyaBluePrimary
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column(modifier = Modifier.weight(1f, fill = false)) {
                                 Text(
                                     text = AppStrings.appTitle(activeLang),
-                                    style = MaterialTheme.typography.titleLarge.copy(
+                                    style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 20.sp
+                                        fontSize = 18.sp
                                     ),
-                                    color = ChaitanyaBluePrimary
+                                    color = ChaitanyaBluePrimary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
                                     text = AppStrings.appSubtitle(activeLang),
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                                    color = ChaitanyaTextSecondary
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.5.sp),
+                                    color = ChaitanyaTextSecondary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
@@ -315,10 +323,13 @@ fun MainAppScreen(viewModel: ChintanSaraniViewModel) {
                                 text = item.label,
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                    fontSize = 11.sp
-                                )
+                                    fontSize = 10.sp
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         },
+                        alwaysShowLabel = true,
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = ColorActiveStatus, // #FD0031
                             selectedTextColor = ColorActiveStatus, // #FD0031

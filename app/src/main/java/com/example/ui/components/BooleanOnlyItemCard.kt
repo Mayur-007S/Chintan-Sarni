@@ -70,7 +70,8 @@ fun BooleanOnlyItemCard(
                     text = title,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        lineHeight = 22.sp
+                        fontSize = 15.sp,
+                        lineHeight = 20.sp
                     ),
                     color = ChaitanyaBluePrimary
                 )
@@ -78,13 +79,16 @@ fun BooleanOnlyItemCard(
                     Spacer(modifier = Modifier.height(3.dp))
                     Text(
                         text = subtitle,
-                        style = MaterialTheme.typography.bodySmall.copy(lineHeight = 16.sp),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 11.5.sp,
+                            lineHeight = 15.sp
+                        ),
                         color = ChaitanyaTextSecondary
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
             YesNoSwitchPill(
                 isYes = isDone,

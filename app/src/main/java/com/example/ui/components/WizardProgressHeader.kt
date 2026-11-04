@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.localization.AppLanguage
@@ -47,9 +48,9 @@ fun WizardProgressHeader(
     modifier: Modifier = Modifier
 ) {
     val steps = listOf(
-        Pair(1, if (language == AppLanguage.MARATHI) "१. पायाभूत" else "1. Foundation"),
-        Pair(2, if (language == AppLanguage.MARATHI) "२. भाव-चिंतन" else "2. Devotion"),
-        Pair(3, if (language == AppLanguage.MARATHI) "३. दोष-निर्मूलन" else "3. Rectification")
+        Pair(1, if (language == AppLanguage.MARATHI) "पायाभूत" else "Foundation"),
+        Pair(2, if (language == AppLanguage.MARATHI) "भाव-चिंतन" else "Devotion"),
+        Pair(3, if (language == AppLanguage.MARATHI) "दोष-निर्मूलन" else "Rectification")
     )
 
     // Navigation background #D3EFFB
@@ -61,7 +62,7 @@ fun WizardProgressHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+                .padding(horizontal = 10.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -88,7 +89,7 @@ fun WizardProgressHeader(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(28.dp)
+                            .size(26.dp)
                             .clip(CircleShape)
                             .background(circleBg),
                         contentAlignment = Alignment.Center
@@ -98,7 +99,7 @@ fun WizardProgressHeader(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = "Step $stepNum Completed",
                                 tint = ColorTextWhite, // #FFFFFF
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(15.dp)
                             )
                         } else {
                             Text(
@@ -110,17 +111,20 @@ fun WizardProgressHeader(
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(5.dp))
 
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
-                            fontSize = 12.sp
+                            fontSize = 11.5.sp
                         ),
                         color = if (isActive) ColorActiveStatus // #FD0031
                         else if (isDone) ChaitanyaBlueDark
-                        else ChaitanyaBlueDark.copy(alpha = 0.7f)
+                        else ChaitanyaBlueDark.copy(alpha = 0.7f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false
                     )
                 }
 

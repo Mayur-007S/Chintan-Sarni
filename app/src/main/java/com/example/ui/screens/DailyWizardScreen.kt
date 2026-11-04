@@ -11,6 +11,8 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -298,7 +300,7 @@ fun DailyWizardScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                         }
 
-                        // Submitted entries component (shows submitted data; clicking shows full details)
+                        // Recent submitted records visible directly on Step 1 without needing to go to Step 3
                         item {
                             SubmittedEntriesSection(
                                 lastSubmittedEntry = lastSubmittedEntry,
@@ -460,7 +462,7 @@ fun DailyWizardScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                         }
 
-                        // Submitted entries component in Step 2 as well
+                        // Recent submitted records visible on Step 2 as well
                         item {
                             SubmittedEntriesSection(
                                 lastSubmittedEntry = lastSubmittedEntry,
@@ -830,11 +832,15 @@ private fun DateSelectionBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+                .padding(horizontal = 10.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Scrollable pills row so buttons NEVER overlap even on narrow screens or long English labels
             Row(
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .horizontalScroll(rememberScrollState()),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
@@ -863,7 +869,7 @@ private fun DateSelectionBar(
                     color = ColorNavigations // #D3EFFB
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
@@ -876,11 +882,15 @@ private fun DateSelectionBar(
                         Text(
                             text = AppStrings.newEntryButton(language),
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = ChaitanyaBlueDark
+                            color = ChaitanyaBlueDark,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.width(6.dp))
 
             // Calendar date picker button
             Surface(
@@ -891,20 +901,22 @@ private fun DateSelectionBar(
                 color = ColorNavigations // #D3EFFB
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.CalendarMonth,
                         contentDescription = "Pick date",
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(15.dp),
                         tint = ChaitanyaBluePrimary
                     )
                     Text(
                         text = selectedDate,
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = ChaitanyaBlueDark
+                        color = ChaitanyaBlueDark,
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
@@ -927,7 +939,7 @@ private fun DatePill(
                 else ChaitanyaSkyContainer
             )
             .clickable { onClick() }
-            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .padding(horizontal = 11.dp, vertical = 6.dp)
             .testTag(testTag),
         contentAlignment = Alignment.Center
     ) {
@@ -937,7 +949,9 @@ private fun DatePill(
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
             ),
             color = if (isSelected) ColorTextWhite // #FFFFFF
-            else ChaitanyaBlueDark
+            else ChaitanyaBlueDark,
+            maxLines = 1,
+            softWrap = false
         )
     }
 }

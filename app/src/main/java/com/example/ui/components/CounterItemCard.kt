@@ -94,7 +94,8 @@ fun CounterItemCard(
                         text = title,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            lineHeight = 22.sp
+                            fontSize = 15.sp,
+                            lineHeight = 20.sp
                         ),
                         color = ChaitanyaBluePrimary
                     )
@@ -102,18 +103,21 @@ fun CounterItemCard(
                         Spacer(modifier = Modifier.height(3.dp))
                         Text(
                             text = subtitle,
-                            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 16.sp),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 11.5.sp,
+                                lineHeight = 15.sp
+                            ),
                             color = ChaitanyaTextSecondary
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 // Stepper controls (increments / decrements directly by 1)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     FilledTonalIconButton(
                         onClick = {
@@ -123,7 +127,7 @@ fun CounterItemCard(
                         },
                         enabled = value > 0,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(36.dp)
                             .testTag("${testTag}_decrement"),
                         shape = CircleShape,
                         colors = IconButtonDefaults.filledTonalIconButtonColors(
@@ -134,7 +138,7 @@ fun CounterItemCard(
                         Icon(
                             imageVector = Icons.Default.Remove,
                             contentDescription = if (isTimeInMinutes) "वेळ १ मिनिट कमी करा" else "Decrease count",
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
 
@@ -161,20 +165,22 @@ fun CounterItemCard(
                         text = displayValue,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = if (isTimeInMinutes && value >= 60) 15.sp else 18.sp
+                            fontSize = if (isTimeInMinutes && value >= 60) 13.5.sp else if (isTimeInMinutes) 14.5.sp else 17.sp
                         ),
                         color = if (value > 0) ColorActiveStatus // #FD0031
                         else ChaitanyaTextSecondary,
                         modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .testTag("${testTag}_value")
+                            .padding(horizontal = 3.dp)
+                            .testTag("${testTag}_value"),
+                        maxLines = 1,
+                        softWrap = false
                     )
 
                     // Increment button with active status color #FD0031 and text #FFFFFF (Increments by 1 directly)
                     FilledTonalIconButton(
                         onClick = { onValueChange(value + 1) },
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(36.dp)
                             .testTag("${testTag}_increment"),
                         shape = CircleShape,
                         colors = IconButtonDefaults.filledTonalIconButtonColors(
@@ -185,7 +191,7 @@ fun CounterItemCard(
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = if (isTimeInMinutes) "वेळ १ मिनिट वाढवा" else "Increase count",
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -226,14 +232,20 @@ fun CounterItemCard(
                     QuickChip(label = "+500") { onValueChange(value + 500) }
                     QuickChip(label = "+1000") { onValueChange(value + 1000) }
                     if (value > 0) {
-                        QuickChip(label = "Reset (0)", isReset = true) { onValueChange(0) }
+                        QuickChip(
+                            label = if (language == AppLanguage.MARATHI) "स्वच्छ करा (०)" else "Reset (0)",
+                            isReset = true
+                        ) { onValueChange(0) }
                     }
                 } else {
                     QuickChip(label = "+1") { onValueChange(value + 1) }
                     QuickChip(label = "+5") { onValueChange(value + 5) }
                     QuickChip(label = "+10") { onValueChange(value + 10) }
                     if (value > 0) {
-                        QuickChip(label = "Reset (0)", isReset = true) { onValueChange(0) }
+                        QuickChip(
+                            label = if (language == AppLanguage.MARATHI) "स्वच्छ करा (०)" else "Reset (0)",
+                            isReset = true
+                        ) { onValueChange(0) }
                     }
                 }
             }
